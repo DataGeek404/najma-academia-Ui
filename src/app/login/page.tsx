@@ -15,13 +15,13 @@ import {
 } from '@mui/material';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { login } from '@/features/auth/api';
 import { LoginFormValues, loginSchema } from '@/features/auth/schemas';
 import { showCenteredError, showCenteredSuccess } from '@/lib/sweet-alert';
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { control, handleSubmit } = useForm<LoginFormValues>({
@@ -123,5 +123,13 @@ export default function LoginPage() {
         </Paper>
       </Container>
     </Box>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageContent />
+    </Suspense>
   );
 }

@@ -57,7 +57,23 @@ export default function AdminTutorsPage() {
   const tutorsQuery = useQuery({ queryKey: ['admin-tutors'], queryFn: () => fetchTutors('', 1, 50), enabled: isReady });
 
   const saveTutorMutation = useMutation({
-    mutationFn: (payload: TutorPayload) => editingTutor ? updateTutor(editingTutor.id, payload) : createTutor(payload),
+    mutationFn: (payload: TutorPayload) => {
+      if (!editingTutor) {
+        return createTutor(payload);
+      }
+
+      const updatePayload: Partial<TutorPayload> = {};
+
+      if (payload.fullName !== editingTutor.fullName) updatePayload.fullName = payload.fullName;
+      if (payload.email !== editingTutor.email) updatePayload.email = payload.email;
+      if ((payload.phone ?? '').trim() !== (editingTutor.phone ?? '').trim()) updatePayload.phone = payload.phone;
+      if (payload.subject !== editingTutor.subject) updatePayload.subject = payload.subject;
+      if ((payload.bio ?? '').trim() !== (editingTutor.bio ?? '').trim()) updatePayload.bio = payload.bio;
+      if (Number(payload.hourlyRate) !== Number(editingTutor.hourlyRate)) updatePayload.hourlyRate = payload.hourlyRate;
+      if (Boolean(payload.isActive) !== Boolean(editingTutor.isActive)) updatePayload.isActive = payload.isActive;
+
+      return updateTutor(editingTutor.id, updatePayload);
+    },
     onSuccess: () => {
       setFeedback({ type: 'success', message: editingTutor ? 'Tutor updated successfully.' : 'Tutor added successfully.' });
       setDialogOpen(false);
@@ -173,7 +189,7 @@ export default function AdminTutorsPage() {
             <TextField label="Email" type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} fullWidth />
             <TextField label="Phone" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} fullWidth />
             <TextField label="Subject" value={form.subject} onChange={(event) => setForm({ ...form, subject: event.target.value })} fullWidth />
-            <TextField label="Hourly Rate" type="number" value={form.hourlyRate} onChange={(event) => setForm({ ...form, hourlyRate: Number(event.target.value) })} fullWidth />
+            <TextField label="Hourly Rate" type="number" value={form.hourlyRate} onChange={(event) => setForm({ ...form, hourlyRate: event.target.value === '' ? 0 : Number(event.target.value) })} fullWidth />
             <TextField label="Bio" value={form.bio} onChange={(event) => setForm({ ...form, bio: event.target.value })} multiline minRows={4} fullWidth />
             <FormControlLabel
               control={<Switch checked={Boolean(form.isActive)} onChange={(event) => setForm({ ...form, isActive: event.target.checked })} />}
