@@ -18,8 +18,12 @@ export const forgotPasswordSchema = z.object({
 });
 
 export const resetPasswordSchema = z.object({
-  token: z.string().optional(),
+  token: z.string().min(1, 'Reset token is required'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
+  confirmPassword: z.string().min(8, 'Please confirm your new password'),
+}).refine((values) => values.password === values.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
 });
 
 export type LoginFormValues = z.infer<typeof loginSchema>;

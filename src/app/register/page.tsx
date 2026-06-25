@@ -26,9 +26,8 @@ type ApiErrorResponse = {
   message?: string | string[] | { message?: string[] };
 };
 
-type AuthResponse = {
-  accessToken: string;
-  user: unknown;
+type RegistrationResponse = {
+  message: string;
 };
 
 export default function RegisterPage() {
@@ -38,11 +37,11 @@ export default function RegisterPage() {
     defaultValues: { fullName: '', email: '', password: '', phone: '', gradeLevel: '' },
   });
 
-  const mutation = useMutation<AuthResponse, AxiosError<ApiErrorResponse>, RegisterFormValues>({
+  const mutation = useMutation<RegistrationResponse, AxiosError<ApiErrorResponse>, RegisterFormValues>({
     mutationFn: register,
-    onSuccess: async () => {
+    onSuccess: async (data) => {
       logoutUser();
-      await showCenteredSuccess('Registration successful', 'Your account has been created. You can now sign in.');
+      await showCenteredSuccess('Registration successful', data.message);
       router.push('/login?registered=1');
     },
     onError: async (requestError: AxiosError<ApiErrorResponse>) => {

@@ -34,6 +34,16 @@ export async function register(payload: RegisterFormValues) {
   return data;
 }
 
+export async function verifyEmail(token: string) {
+  const { data } = await apiClient.post('/auth/verify-email', { token });
+  return data;
+}
+
+export async function resendVerification(email: string) {
+  const { data } = await apiClient.post('/auth/resend-verification', { email });
+  return data;
+}
+
 export async function forgotPassword(payload: ForgotPasswordFormValues) {
   const { data } = await apiClient.post('/auth/forgot-password', payload);
   return data;

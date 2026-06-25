@@ -18,7 +18,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { getAuthErrorMessage, login } from '@/features/auth/api';
+import { getAuthErrorMessage, login, resendVerification } from '@/features/auth/api';
 import { LoginFormValues, loginSchema } from '@/features/auth/schemas';
 import { showCenteredError, showCenteredSuccess } from '@/lib/sweet-alert';
 
@@ -29,16 +29,30 @@ type ApiErrorResponse = {
 function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { control, handleSubmit } = useForm<LoginFormValues>({
+  const { control, handleSubmit, getValues } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
   });
 
   useEffect(() => {
     if (searchParams.get('registered') === '1') {
-      void showCenteredSuccess('Account created', 'Your student account is ready. Sign in to continue.');
+      void showCenteredSuccess('Account created', 'Your account has been created. Please verify your email before signing in.');
+    }
+
+    if (searchParams.get('verified') === '1') {
+      void showCenteredSuccess('Email verified', 'Your email has been verified. You can now sign in.');
     }
   }, [searchParams]);
+
+  const resendMutation = useMutation<{ message: string }, AxiosError<ApiErrorResponse>, string>({
+    mutationFn: resendVerification,
+    onSuccess: async (data) => {
+      await showCenteredSuccess('Verification email sent', data.message);
+    },
+    onError: async (error) => {
+      await showCenteredError('Unable to resend verification', getAuthErrorMessage(error, 'Please try again later.'));
+    },
+  });
 
   const mutation = useMutation<any, AxiosError<ApiErrorResponse>, LoginFormValues>({
     mutationFn: login,
@@ -49,7 +63,15 @@ function LoginPageContent() {
       router.push(data.user.role === 'admin' ? '/admin' : '/bookings');
     },
     onError: async (error: AxiosError<ApiErrorResponse>) => {
-      await showCenteredError('Login failed', getAuthErrorMessage(error, 'Please check your credentials and try again.'));
+      const message = getAuthErrorMessage(error, 'Please check your credentials and try again.');
+      await showCenteredError('Login failed', message);
+
+      if (message.toLowerCase().includes('verify your email')) {
+        const email = getValues('email').trim();
+        if (email) {
+          resendMutation.mutate(email);
+        }
+      }
     },
   });
 
@@ -118,7 +140,7 @@ function LoginPageContent() {
                 <Button
                   type="submit"
                   variant="contained"
-                  disabled={mutation.isPending}
+                  disabled={mutation.isPending || resendMutation.isPending}
                   size="large"
                   fullWidth
                   startIcon={mutation.isPending ? <CircularProgress size={20} color="inherit" /> : null}
@@ -126,6 +148,11 @@ function LoginPageContent() {
                 >
                   {mutation.isPending ? 'Signing in...' : 'Sign In'}
                 </Button>
+                {resendMutation.isPending ? (
+                  <Typography variant="body2" color="text.secondary" textAlign="center">
+                    Sending a new verification email...
+                  </Typography>
+                ) : null}
                 <Button component={Link} href="/register" fullWidth>
                   Create student account
                 </Button>
