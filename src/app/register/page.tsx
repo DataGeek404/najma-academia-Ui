@@ -108,7 +108,11 @@ export default function RegisterPage() {
               })}
             />
             <Stack spacing={3} sx={{ position: 'relative', maxWidth: 520 }}>
-              <Chip label="Create account" sx={{ alignSelf: 'flex-start', color: 'common.white', borderColor: alpha(theme.palette.common.white, 0.35) }} variant="outlined" />
+              <Chip
+                label="Create account"
+                sx={(theme) => ({ alignSelf: 'flex-start', color: 'common.white', borderColor: alpha(theme.palette.common.white, 0.35) })}
+                variant="outlined"
+              />
               <Stack spacing={1.5}>
                 <Typography variant="h3" fontWeight={900} sx={{ fontSize: { xs: '2.2rem', md: '3rem' }, lineHeight: 1.05 }}>
                   Start learning with confidence

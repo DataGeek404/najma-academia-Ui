@@ -134,7 +134,11 @@ function LoginPageContent() {
               })}
             />
             <Stack spacing={3} sx={{ position: 'relative', maxWidth: 520 }}>
-              <Chip label="Learner access" sx={{ alignSelf: 'flex-start', color: 'common.white', borderColor: alpha(theme.palette.common.white, 0.35) }} variant="outlined" />
+              <Chip
+                label="Learner access"
+                sx={(theme) => ({ alignSelf: 'flex-start', color: 'common.white', borderColor: alpha(theme.palette.common.white, 0.35) })}
+                variant="outlined"
+              />
               <Stack spacing={1.5}>
                 <Typography variant="h3" fontWeight={900} sx={{ fontSize: { xs: '2.2rem', md: '3rem' }, lineHeight: 1.05 }}>
                   Welcome back to Najma
