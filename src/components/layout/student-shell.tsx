@@ -33,7 +33,7 @@ import { logoutUser } from '@/features/auth/logout';
 
 const drawerWidth = 300;
 
-const navItems = [
+export const studentNavItems = [
   { label: 'Dashboard', caption: 'Bookings and progress', href: '/bookings', icon: <DashboardIcon /> },
   { label: 'Tutors', caption: 'Browse tutor profiles', href: '/tutors', icon: <SchoolIcon /> },
 ];
@@ -83,7 +83,7 @@ export function StudentShell({ children }: PropsWithChildren) {
             Student workspace
           </Typography>
           <List sx={{ py: 1 }}>
-            {navItems.map((item) => {
+            {studentNavItems.map((item) => {
               const isActive = pathname === item.href;
 
               return (
@@ -215,24 +215,7 @@ export function StudentShell({ children }: PropsWithChildren) {
         {drawerContent}
       </Drawer>
 
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          display: { xs: 'none', md: 'block' },
-          [`& .MuiDrawer-paper`]: {
-            width: drawerWidth,
-            boxSizing: 'border-box',
-            borderRight: '1px solid rgba(0,0,0,0.06)',
-            bgcolor: '#fff',
-          },
-        }}
-      >
-        {drawerContent}
-      </Drawer>
-
-      <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, sm: 3, md: 4 }, pt: { xs: 12, sm: 13 }, width: '100%', minWidth: 0 }}>
+      <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, sm: 3, md: 4 }, pt: { xs: 12, sm: 13 }, width: '100%', minWidth: 0, maxWidth: 1600, mx: 'auto' }}>
         {children}
       </Box>
     </Box>

@@ -24,7 +24,7 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { StudentShell } from '@/components/layout/student-shell';
+import { StudentShell, studentNavItems } from '@/components/layout/student-shell';
 import { BookingsTable } from '@/components/tables/bookings-table';
 import { requireRole, getStoredUser } from '@/features/auth/session';
 import { createBooking, fetchMyBookings } from '@/features/bookings/api';
@@ -167,6 +167,82 @@ export default function BookingsPage() {
             </Stack>
           </Stack>
         </Paper>
+
+        <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
+          <Paper
+            elevation={0}
+            sx={(theme) => ({
+              p: { lg: 2.5, xl: 3 },
+              borderRadius: 5,
+              border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
+              background: `linear-gradient(180deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.background.paper, 0.98)} 100%)`,
+              boxShadow: `0 20px 45px ${alpha(theme.palette.common.black, 0.06)}`,
+            })}
+          >
+            <Stack spacing={2.5} alignItems="center">
+              <Stack spacing={0.75} alignItems="center" textAlign="center" sx={{ maxWidth: 720 }}>
+                <Typography variant="overline" sx={{ letterSpacing: 1.6, fontWeight: 800, color: 'primary.main' }}>
+                  Quick navigation
+                </Typography>
+                <Typography variant="h5" fontWeight={900} color="text.primary">
+                  Jump to the modules you use most
+                </Typography>
+                <Typography color="text.secondary">
+                  Your main learner tools are centered here for faster access on larger screens.
+                </Typography>
+              </Stack>
+
+              <Grid container spacing={2} sx={{ width: '100%', justifyContent: 'center' }}>
+                {studentNavItems.map((item) => {
+                  const isActive = item.href === '/bookings';
+
+                  return (
+                    <Grid key={item.href} size={{ lg: 5, xl: 4 }}>
+                      <Paper
+                        component={Link}
+                        href={item.href}
+                        elevation={0}
+                        sx={(theme) => ({
+                          display: 'block',
+                          p: 2.5,
+                          height: '100%',
+                          textDecoration: 'none',
+                          borderRadius: 4,
+                          border: `1px solid ${isActive ? alpha(theme.palette.primary.main, 0.24) : alpha(theme.palette.divider, 0.8)}`,
+                          bgcolor: isActive ? alpha(theme.palette.primary.main, 0.1) : theme.palette.background.paper,
+                          boxShadow: isActive ? `0 18px 40px ${alpha(theme.palette.primary.main, 0.12)}` : `0 14px 32px ${alpha(theme.palette.common.black, 0.05)}`,
+                          transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
+                          '&:hover': {
+                            transform: 'translateY(-4px)',
+                            borderColor: alpha(theme.palette.primary.main, 0.28),
+                            boxShadow: `0 22px 44px ${alpha(theme.palette.primary.main, 0.12)}`,
+                          },
+                        })}
+                      >
+                        <Stack spacing={2}>
+                          <Stack direction="row" justifyContent="space-between" alignItems="center">
+                            <Avatar sx={(theme) => ({ bgcolor: alpha(theme.palette.primary.main, 0.12), color: 'primary.main', width: 52, height: 52 })}>
+                              {item.icon}
+                            </Avatar>
+                            <Chip label={isActive ? 'Current module' : 'Open module'} color={isActive ? 'primary' : 'default'} variant={isActive ? 'filled' : 'outlined'} size="small" />
+                          </Stack>
+                          <Box>
+                            <Typography variant="h6" fontWeight={800} color="text.primary">
+                              {item.label}
+                            </Typography>
+                            <Typography color="text.secondary" sx={{ mt: 0.75 }}>
+                              {item.caption}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                      </Paper>
+                    </Grid>
+                  );
+                })}
+              </Grid>
+            </Stack>
+          </Paper>
+        </Box>
 
         <Grid container spacing={{ xs: 2, md: 3 }}>
           {[
