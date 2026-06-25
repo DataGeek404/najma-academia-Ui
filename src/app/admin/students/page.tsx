@@ -1,12 +1,20 @@
 'use client';
 
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import Groups2Icon from '@mui/icons-material/Groups2';
 import SchoolIcon from '@mui/icons-material/School';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Alert,
   alpha,
   Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
   Paper,
   Stack,
   Table,
@@ -15,13 +23,14 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Typography,
 } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import { requireRole } from '@/features/auth/session';
-import { fetchStudents } from '@/features/students/api';
+import { deleteStudent, fetchStudents, StudentPayload, updateStudent } from '@/features/students/api';
 
 type AdminStudent = {
   id: number;
@@ -37,9 +46,20 @@ type AdminStudent = {
   };
 };
 
+const initialStudentForm: StudentPayload = {
+  phone: '',
+  gradeLevel: '',
+  notes: '',
+};
+
 export default function AdminStudentsPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isReady, setIsReady] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingStudent, setEditingStudent] = useState<AdminStudent | null>(null);
+  const [form, setForm] = useState<StudentPayload>(initialStudentForm);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   useEffect(() => {
     if (!requireRole('admin')) {
@@ -52,6 +72,37 @@ export default function AdminStudentsPage() {
 
   const studentsQuery = useQuery({ queryKey: ['admin-students'], queryFn: fetchStudents, enabled: isReady });
   const students = (studentsQuery.data ?? []) as AdminStudent[];
+
+  const saveStudentMutation = useMutation({
+    mutationFn: (payload: StudentPayload) => updateStudent(editingStudent!.id, payload),
+    onSuccess: () => {
+      setFeedback({ type: 'success', message: 'Student updated successfully.' });
+      setDialogOpen(false);
+      setEditingStudent(null);
+      setForm(initialStudentForm);
+      queryClient.invalidateQueries({ queryKey: ['admin-students'] });
+    },
+    onError: () => setFeedback({ type: 'error', message: 'Unable to save student details right now.' }),
+  });
+
+  const deleteStudentMutation = useMutation({
+    mutationFn: deleteStudent,
+    onSuccess: () => {
+      setFeedback({ type: 'success', message: 'Student removed successfully.' });
+      queryClient.invalidateQueries({ queryKey: ['admin-students'] });
+    },
+    onError: () => setFeedback({ type: 'error', message: 'Unable to delete student right now.' }),
+  });
+
+  const openEditDialog = (student: AdminStudent) => {
+    setEditingStudent(student);
+    setForm({
+      phone: student.phone ?? '',
+      gradeLevel: student.gradeLevel ?? '',
+      notes: student.notes ?? '',
+    });
+    setDialogOpen(true);
+  };
 
   if (!isReady) {
     return null;
@@ -218,6 +269,15 @@ export default function AdminStudentsPage() {
                             {student.notes || 'No notes added for this student.'}
                           </Typography>
                         </Stack>
+
+                        <Stack direction="row" spacing={1}>
+                          <Button size="small" startIcon={<EditOutlinedIcon />} onClick={() => openEditDialog(student)}>
+                            Edit
+                          </Button>
+                          <Button size="small" color="error" startIcon={<DeleteOutlineIcon />} onClick={() => deleteStudentMutation.mutate(student.id)}>
+                            Delete
+                          </Button>
+                        </Stack>
                       </Stack>
                     </Paper>
                   ))}
@@ -234,6 +294,7 @@ export default function AdminStudentsPage() {
                         <TableCell sx={{ fontWeight: 700 }}>Grade Level</TableCell>
                         <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
                         <TableCell sx={{ fontWeight: 700 }}>Notes</TableCell>
+                        <TableCell sx={{ fontWeight: 700 }} align="right">Actions</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -272,6 +333,16 @@ export default function AdminStudentsPage() {
                               {student.notes || '—'}
                             </Typography>
                           </TableCell>
+                          <TableCell align="right">
+                            <Stack direction="row" spacing={1} justifyContent="flex-end">
+                              <IconButton color="primary" onClick={() => openEditDialog(student)}>
+                                <EditOutlinedIcon />
+                              </IconButton>
+                              <IconButton color="error" onClick={() => deleteStudentMutation.mutate(student.id)}>
+                                <DeleteOutlineIcon />
+                              </IconButton>
+                            </Stack>
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -281,6 +352,23 @@ export default function AdminStudentsPage() {
             )}
           </Stack>
         </Paper>
+
+        <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="sm">
+          <DialogTitle>Edit Student</DialogTitle>
+          <DialogContent>
+            <Stack spacing={2} sx={{ pt: 1 }}>
+              <TextField label="Phone" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} fullWidth />
+              <TextField label="Grade Level" value={form.gradeLevel} onChange={(event) => setForm({ ...form, gradeLevel: event.target.value })} fullWidth />
+              <TextField label="Notes" value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} multiline minRows={4} fullWidth />
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button variant="contained" onClick={() => saveStudentMutation.mutate(form)} disabled={saveStudentMutation.isPending || !editingStudent}>
+              {saveStudentMutation.isPending ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Stack>
     </DashboardShell>
   );

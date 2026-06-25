@@ -65,7 +65,14 @@ export default function AdminTutorsPage() {
       setForm(initialTutorForm);
       queryClient.invalidateQueries({ queryKey: ['admin-tutors'] });
     },
-    onError: () => setFeedback({ type: 'error', message: 'Unable to save tutor details. Please review the form and try again.' }),
+    onError: (error: any) => setFeedback({
+      type: 'error',
+      message: error?.response?.data?.message
+        ? Array.isArray(error.response.data.message)
+          ? error.response.data.message.join(', ')
+          : error.response.data.message
+        : 'Unable to save tutor details. Please review the form and try again.',
+    }),
   });
 
   const deleteTutorMutation = useMutation({

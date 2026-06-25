@@ -27,3 +27,17 @@ export async function updateBookingStatus(id: number, status: string) {
   return data;
 }
 
+export async function updateBooking(id: number, payload: {
+  tutorId: number;
+  sessionStart: string;
+  sessionEnd: string;
+  notes?: string;
+}) {
+  const { data } = await apiClient.patch(`/bookings/${id}`, payload);
+  return data;
+}
+
+export async function deleteBooking(id: number) {
+  const { data } = await apiClient.delete(`/bookings/${id}`);
+  return data;
+}
