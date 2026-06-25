@@ -1,15 +1,9 @@
 'use client';
 
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import SchoolIcon from '@mui/icons-material/School';
-import ScheduleIcon from '@mui/icons-material/Schedule';
-import TaskAltIcon from '@mui/icons-material/TaskAlt';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   alpha,
-  Avatar,
   Box,
   Button,
   Chip,
@@ -24,7 +18,7 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { StudentShell, studentNavItems } from '@/components/layout/student-shell';
+import { StudentShell } from '@/components/layout/student-shell';
 import { BookingsTable } from '@/components/tables/bookings-table';
 import { requireRole, getStoredUser } from '@/features/auth/session';
 import { createBooking, fetchMyBookings } from '@/features/bookings/api';
@@ -154,131 +148,40 @@ export default function BookingsPage() {
                 Welcome back, {user?.email?.split('@')[0] ?? 'student'}
               </Typography>
               <Typography sx={{ opacity: 0.92, maxWidth: 680 }}>
-                Keep your tutoring journey organized with a clearer overview, faster booking flow, and quick access to the tutors you need.
+                Keep your tutoring journey organized and request your next session with less clutter and faster access to what matters.
               </Typography>
             </Stack>
-            <Stack spacing={1.5} sx={{ width: { xs: '100%', sm: 'auto' } }}>
+            <Stack spacing={1.5} sx={{ width: { xs: '100%', sm: 'auto' }, minWidth: { lg: 280 } }}>
+              <Paper
+                elevation={0}
+                sx={(theme) => ({
+                  p: 2,
+                  borderRadius: 4,
+                  bgcolor: alpha(theme.palette.common.white, 0.14),
+                  backdropFilter: 'blur(8px)',
+                })}
+              >
+                <Stack spacing={1}>
+                  <Typography fontWeight={800}>Overview</Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.92 }}>
+                    {nextBooking
+                      ? `Your next session is on ${new Date(nextBooking.sessionStart).toLocaleDateString()}.`
+                      : 'You do not have an upcoming session yet.'}
+                  </Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.92 }}>
+                    {pendingCount} pending • {confirmedCount} confirmed • {completedCount} completed
+                  </Typography>
+                </Stack>
+              </Paper>
               <Button component={Link} href="/tutors" variant="contained" color="inherit" endIcon={<ArrowForwardIcon />} sx={{ color: 'primary.main' }}>
                 Explore tutors
-              </Button>
-              <Button variant="outlined" color="inherit" onClick={() => void showInfoToast('Booking form ready', 'Use the booking panel below to request your next session.')} sx={{ borderColor: 'rgba(255,255,255,0.45)' }}>
-                Open booking tips
               </Button>
             </Stack>
           </Stack>
         </Paper>
 
-        <Box sx={{ display: { xs: 'none', lg: 'block' } }}>
-          <Paper
-            elevation={0}
-            sx={(theme) => ({
-              p: { lg: 2.5, xl: 3 },
-              borderRadius: 5,
-              border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
-              background: `linear-gradient(180deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.background.paper, 0.98)} 100%)`,
-              boxShadow: `0 20px 45px ${alpha(theme.palette.common.black, 0.06)}`,
-            })}
-          >
-            <Stack spacing={2.5} alignItems="center">
-              <Stack spacing={0.75} alignItems="center" textAlign="center" sx={{ maxWidth: 720 }}>
-                <Typography variant="overline" sx={{ letterSpacing: 1.6, fontWeight: 800, color: 'primary.main' }}>
-                  Quick navigation
-                </Typography>
-                <Typography variant="h5" fontWeight={900} color="text.primary">
-                  Jump to the modules you use most
-                </Typography>
-                <Typography color="text.secondary">
-                  Your main learner tools are centered here for faster access on larger screens.
-                </Typography>
-              </Stack>
-
-              <Grid container spacing={2} sx={{ width: '100%', justifyContent: 'center' }}>
-                {studentNavItems.map((item) => {
-                  const isActive = item.href === '/bookings';
-
-                  return (
-                    <Grid key={item.href} size={{ lg: 5, xl: 4 }}>
-                      <Paper
-                        component={Link}
-                        href={item.href}
-                        elevation={0}
-                        sx={(theme) => ({
-                          display: 'block',
-                          p: 2.5,
-                          height: '100%',
-                          textDecoration: 'none',
-                          borderRadius: 4,
-                          border: `1px solid ${isActive ? alpha(theme.palette.primary.main, 0.24) : alpha(theme.palette.divider, 0.8)}`,
-                          bgcolor: isActive ? alpha(theme.palette.primary.main, 0.1) : theme.palette.background.paper,
-                          boxShadow: isActive ? `0 18px 40px ${alpha(theme.palette.primary.main, 0.12)}` : `0 14px 32px ${alpha(theme.palette.common.black, 0.05)}`,
-                          transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
-                          '&:hover': {
-                            transform: 'translateY(-4px)',
-                            borderColor: alpha(theme.palette.primary.main, 0.28),
-                            boxShadow: `0 22px 44px ${alpha(theme.palette.primary.main, 0.12)}`,
-                          },
-                        })}
-                      >
-                        <Stack spacing={2}>
-                          <Stack direction="row" justifyContent="space-between" alignItems="center">
-                            <Avatar sx={(theme) => ({ bgcolor: alpha(theme.palette.primary.main, 0.12), color: 'primary.main', width: 52, height: 52 })}>
-                              {item.icon}
-                            </Avatar>
-                            <Chip label={isActive ? 'Current module' : 'Open module'} color={isActive ? 'primary' : 'default'} variant={isActive ? 'filled' : 'outlined'} size="small" />
-                          </Stack>
-                          <Box>
-                            <Typography variant="h6" fontWeight={800} color="text.primary">
-                              {item.label}
-                            </Typography>
-                            <Typography color="text.secondary" sx={{ mt: 0.75 }}>
-                              {item.caption}
-                            </Typography>
-                          </Box>
-                        </Stack>
-                      </Paper>
-                    </Grid>
-                  );
-                })}
-              </Grid>
-            </Stack>
-          </Paper>
-        </Box>
-
         <Grid container spacing={{ xs: 2, md: 3 }}>
-          {[
-            { label: 'Available tutors', value: (tutorsQuery.data?.rows ?? []).length, icon: <SchoolIcon />, color: '#1976d2', helper: 'Ready to book' },
-            { label: 'Pending requests', value: pendingCount, icon: <ScheduleIcon />, color: '#ed6c02', helper: 'Awaiting review' },
-            { label: 'Confirmed sessions', value: confirmedCount, icon: <AutoAwesomeIcon />, color: '#7b1fa2', helper: 'Planned ahead' },
-            { label: 'Completed sessions', value: completedCount, icon: <TaskAltIcon />, color: '#2e7d32', helper: 'Progress made' },
-          ].map((item) => (
-            <Grid key={item.label} size={{ xs: 12, sm: 6, xl: 3 }}>
-              <Paper
-                elevation={0}
-                sx={{
-                  p: 2.5,
-                  borderRadius: 5,
-                  border: (theme) => `1px solid ${alpha(theme.palette.divider, 0.8)}`,
-                  boxShadow: (theme) => `0 18px 40px ${alpha(theme.palette.common.black, 0.05)}`,
-                  height: '100%',
-                }}
-              >
-                <Stack spacing={2}>
-                  <Stack direction="row" justifyContent="space-between" alignItems="center">
-                    <Avatar sx={{ bgcolor: alpha(item.color, 0.12), color: item.color }}>{item.icon}</Avatar>
-                    <Chip label={item.helper} size="small" variant="outlined" />
-                  </Stack>
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">{item.label}</Typography>
-                    <Typography variant="h4" fontWeight={900}>{item.value}</Typography>
-                  </Box>
-                </Stack>
-              </Paper>
-            </Grid>
-          ))}
-        </Grid>
-
-        <Grid container spacing={{ xs: 2, md: 3 }}>
-          <Grid size={{ xs: 12, xl: 8 }}>
+          <Grid size={{ xs: 12 }}>
             <Paper
               elevation={0}
               sx={(theme) => ({
@@ -286,7 +189,6 @@ export default function BookingsPage() {
                 borderRadius: 5,
                 border: `1px solid ${alpha(theme.palette.divider, 0.8)}`,
                 boxShadow: `0 18px 40px ${alpha(theme.palette.common.black, 0.05)}`,
-                height: '100%',
               })}
             >
               <Stack spacing={3}>
@@ -393,71 +295,6 @@ export default function BookingsPage() {
                 </Stack>
               </Stack>
             </Paper>
-          </Grid>
-
-          <Grid size={{ xs: 12, xl: 4 }}>
-            <Stack spacing={2.5}>
-              <Paper
-                elevation={0}
-                sx={(theme) => ({
-                  p: 2.5,
-                  borderRadius: 5,
-                  border: `1px solid ${alpha(theme.palette.divider, 0.8)}`,
-                  boxShadow: `0 18px 40px ${alpha(theme.palette.common.black, 0.05)}`,
-                })}
-              >
-                <Stack spacing={1.5}>
-                  <Typography variant="h6" fontWeight={800}>Next session</Typography>
-                  {nextBooking ? (
-                    <>
-                      <Typography fontWeight={700}>{nextBooking.tutor?.fullName ?? 'Tutor assigned soon'}</Typography>
-                      <Typography color="text.secondary">{new Date(nextBooking.sessionStart).toLocaleString()}</Typography>
-                      <Chip label={nextBooking.status} color="primary" variant="outlined" sx={{ alignSelf: 'flex-start' }} />
-                    </>
-                  ) : (
-                    <Typography color="text.secondary">You do not have an upcoming session yet. Create one from the booking form.</Typography>
-                  )}
-                </Stack>
-              </Paper>
-
-              <Paper
-                elevation={0}
-                sx={(theme) => ({
-                  p: 2.5,
-                  borderRadius: 5,
-                  border: `1px solid ${alpha(theme.palette.divider, 0.8)}`,
-                  boxShadow: `0 18px 40px ${alpha(theme.palette.common.black, 0.05)}`,
-                })}
-              >
-                <Stack spacing={1.5}>
-                  <Typography variant="h6" fontWeight={800}>Study momentum</Typography>
-                  <Typography color="text.secondary">
-                    {completedCount > 0
-                      ? `Great work. You have already completed ${completedCount} tutoring session${completedCount > 1 ? 's' : ''}.`
-                      : 'Start building momentum by booking your first tutoring session.'}
-                  </Typography>
-                  <Button component={Link} href="/tutors" variant="outlined" endIcon={<ArrowForwardIcon />}>
-                    Find a tutor
-                  </Button>
-                </Stack>
-              </Paper>
-
-              <Paper
-                elevation={0}
-                sx={(theme) => ({
-                  p: 2.5,
-                  borderRadius: 5,
-                  border: `1px solid ${alpha(theme.palette.divider, 0.8)}`,
-                  boxShadow: `0 18px 40px ${alpha(theme.palette.common.black, 0.05)}`,
-                })}
-              >
-                <Stack spacing={1.5}>
-                  <Typography variant="h6" fontWeight={800}>Quick guidance</Typography>
-                  <Typography color="text.secondary">Use the student menu on small screens to switch between your dashboard and tutor directory.</Typography>
-                  <Typography color="text.secondary">Keep notes specific so tutors can prepare before the session starts.</Typography>
-                </Stack>
-              </Paper>
-            </Stack>
           </Grid>
         </Grid>
 

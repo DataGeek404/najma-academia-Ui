@@ -48,7 +48,7 @@ export function StudentShell({ children }: PropsWithChildren) {
   const handleLogout = () => {
     logoutUser();
     setMobileOpen(false);
-    router.push('/login');
+    router.push('/');
   };
 
   const drawerContent = (
@@ -210,7 +210,24 @@ export function StudentShell({ children }: PropsWithChildren) {
         {drawerContent}
       </Drawer>
 
-      <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, sm: 3, md: 4 }, pt: { xs: 12, sm: 13 }, width: '100%', minWidth: 0, maxWidth: 1600, mx: 'auto' }}>
+      <Drawer
+        variant="permanent"
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          display: { xs: 'none', md: 'block' },
+          [`& .MuiDrawer-paper`]: {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+            borderRight: '1px solid rgba(0,0,0,0.06)',
+            bgcolor: '#fff',
+          },
+        }}
+      >
+        {drawerContent}
+      </Drawer>
+
+      <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, sm: 3, md: 4 }, pt: { xs: 12, sm: 13 }, width: '100%', minWidth: 0 }}>
         {children}
       </Box>
     </Box>
