@@ -3,9 +3,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import {
-  Alert,
+  alpha,
   Box,
   Button,
+  CircularProgress,
   Container,
   Paper,
   Stack,
@@ -15,11 +16,11 @@ import {
 import type { AxiosError } from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { register } from '@/features/auth/api';
 import { logoutUser } from '@/features/auth/logout';
 import { RegisterFormValues, registerSchema } from '@/features/auth/schemas';
+import { showCenteredError, showCenteredSuccess } from '@/lib/sweet-alert';
 
 type ApiErrorResponse = {
   message?: string | string[] | { message?: string[] };
@@ -50,7 +51,6 @@ function getErrorMessage(error: AxiosError<ApiErrorResponse>) {
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [error, setError] = useState('');
   const { control, handleSubmit } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: { fullName: '', email: '', password: '', phone: '', gradeLevel: '' },
@@ -58,18 +58,47 @@ export default function RegisterPage() {
 
   const mutation = useMutation<AuthResponse, AxiosError<ApiErrorResponse>, RegisterFormValues>({
     mutationFn: register,
-    onSuccess: () => {
+    onSuccess: async () => {
       logoutUser();
+      await showCenteredSuccess('Registration successful', 'Your account has been created. You can now sign in.');
       router.push('/login?registered=1');
     },
-    onError: (requestError: AxiosError<ApiErrorResponse>) => setError(getErrorMessage(requestError)),
+    onError: async (requestError: AxiosError<ApiErrorResponse>) => {
+      await showCenteredError('Registration failed', getErrorMessage(requestError));
+    },
   });
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', py: { xs: 4, sm: 6 } }}>
+    <Box
+      sx={(theme) => ({
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        py: { xs: 4, sm: 6 },
+        background: `radial-gradient(circle at top, ${alpha(theme.palette.secondary.main, 0.14)} 0%, ${theme.palette.background.default} 42%)`,
+      })}
+    >
       <Container maxWidth="sm">
-        <Paper elevation={3} sx={{ p: { xs: 3, sm: 4 }, borderRadius: 4 }}>
-          <Stack spacing={3}>
+        <Paper
+          elevation={0}
+          sx={(theme) => ({
+            p: { xs: 3, sm: 4 },
+            borderRadius: 5,
+            border: `1px solid ${alpha(theme.palette.secondary.main, 0.14)}`,
+            boxShadow: `0 24px 60px ${alpha(theme.palette.common.black, 0.08)}`,
+            overflow: 'hidden',
+            position: 'relative',
+          })}
+        >
+          <Box
+            sx={(theme) => ({
+              position: 'absolute',
+              inset: 0,
+              background: `linear-gradient(180deg, ${alpha(theme.palette.secondary.main, 0.08)} 0%, transparent 38%)`,
+              pointerEvents: 'none',
+            })}
+          />
+          <Stack spacing={3} sx={{ position: 'relative' }}>
             <Stack spacing={1} textAlign="center">
               <Typography variant="h4" fontWeight={700} sx={{ fontSize: { xs: '1.9rem', sm: '2.25rem' } }}>
                 Create your student account
@@ -78,7 +107,6 @@ export default function RegisterPage() {
                 Join CampusConnect to book tutoring sessions, track support appointments, and stay organized this semester.
               </Typography>
             </Stack>
-            {error && <Alert severity="error">{error}</Alert>}
             <Box component="form" onSubmit={handleSubmit((values) => mutation.mutate(values))}>
               <Stack spacing={2}>
                 <Controller
@@ -112,8 +140,16 @@ export default function RegisterPage() {
                   control={control}
                   render={({ field }) => <TextField {...field} label="Year of Study" fullWidth />}
                 />
-                <Button type="submit" variant="contained" disabled={mutation.isPending} size="large" fullWidth>
-                  Register
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={mutation.isPending}
+                  size="large"
+                  fullWidth
+                  startIcon={mutation.isPending ? <CircularProgress size={20} color="inherit" /> : null}
+                  sx={{ minHeight: 52 }}
+                >
+                  {mutation.isPending ? 'Creating account...' : 'Register'}
                 </Button>
                 <Button component={Link} href="/login" fullWidth>
                   Already have an account? Sign in

@@ -3,9 +3,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import {
-  Alert,
+  alpha,
   Box,
   Button,
+  CircularProgress,
   Container,
   Paper,
   Stack,
@@ -13,35 +14,71 @@ import {
   Typography,
 } from '@mui/material';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { login } from '@/features/auth/api';
 import { LoginFormValues, loginSchema } from '@/features/auth/schemas';
+import { showCenteredError, showCenteredSuccess } from '@/lib/sweet-alert';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [error, setError] = useState('');
+  const searchParams = useSearchParams();
   const { control, handleSubmit } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
   });
 
+  useEffect(() => {
+    if (searchParams.get('registered') === '1') {
+      void showCenteredSuccess('Account created', 'Your student account is ready. Sign in to continue.');
+    }
+  }, [searchParams]);
+
   const mutation = useMutation({
     mutationFn: login,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       localStorage.setItem('accessToken', data.accessToken);
       localStorage.setItem('user', JSON.stringify(data.user));
+      await showCenteredSuccess('Login successful', 'Welcome back to your tutoring workspace.');
       router.push(data.user.role === 'admin' ? '/admin' : '/bookings');
     },
-    onError: () => setError('Login failed. Please check your credentials.'),
+    onError: async () => {
+      await showCenteredError('Login failed', 'Please check your credentials and try again.');
+    },
   });
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', py: { xs: 4, sm: 6 } }}>
+    <Box
+      sx={(theme) => ({
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        py: { xs: 4, sm: 6 },
+        background: `radial-gradient(circle at top, ${alpha(theme.palette.primary.main, 0.14)} 0%, ${theme.palette.background.default} 42%)`,
+      })}
+    >
       <Container maxWidth="sm">
-        <Paper elevation={3} sx={{ p: { xs: 3, sm: 4 }, borderRadius: 4 }}>
-          <Stack spacing={3}>
+        <Paper
+          elevation={0}
+          sx={(theme) => ({
+            p: { xs: 3, sm: 4 },
+            borderRadius: 5,
+            border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
+            boxShadow: `0 24px 60px ${alpha(theme.palette.common.black, 0.08)}`,
+            overflow: 'hidden',
+            position: 'relative',
+          })}
+        >
+          <Box
+            sx={(theme) => ({
+              position: 'absolute',
+              inset: 0,
+              background: `linear-gradient(180deg, ${alpha(theme.palette.primary.main, 0.08)} 0%, transparent 38%)`,
+              pointerEvents: 'none',
+            })}
+          />
+          <Stack spacing={3} sx={{ position: 'relative' }}>
             <Stack spacing={1} textAlign="center">
               <Typography variant="h4" fontWeight={700} sx={{ fontSize: { xs: '1.9rem', sm: '2.25rem' } }}>
                 Welcome back
@@ -50,7 +87,6 @@ export default function LoginPage() {
                 Sign in to manage your university tutoring sessions and academic support bookings.
               </Typography>
             </Stack>
-            {error && <Alert severity="error">{error}</Alert>}
             <Box component="form" onSubmit={handleSubmit((values) => mutation.mutate(values))}>
               <Stack spacing={2}>
                 <Controller
@@ -67,8 +103,16 @@ export default function LoginPage() {
                     <TextField {...field} type="password" label="Password" error={!!fieldState.error} helperText={fieldState.error?.message} fullWidth />
                   )}
                 />
-                <Button type="submit" variant="contained" disabled={mutation.isPending} size="large" fullWidth>
-                  Sign In
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={mutation.isPending}
+                  size="large"
+                  fullWidth
+                  startIcon={mutation.isPending ? <CircularProgress size={20} color="inherit" /> : null}
+                  sx={{ minHeight: 52 }}
+                >
+                  {mutation.isPending ? 'Signing in...' : 'Sign In'}
                 </Button>
                 <Button component={Link} href="/register" fullWidth>
                   Create student account
