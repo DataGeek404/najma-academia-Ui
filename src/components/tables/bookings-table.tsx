@@ -111,7 +111,7 @@ export function BookingsTable({ bookings, variant = 'student', onStatusChange, u
                 <Stack direction="row" justifyContent="space-between" spacing={2}>
                   <Typography variant="caption" color="text.secondary">Student</Typography>
                   <Typography variant="body2" fontWeight={600} sx={{ textAlign: 'right' }}>
-                    {booking.student?.user?.fullName ?? booking.student?.fullName ?? 'Student'}
+                    {booking.student?.user?.fullName ?? 'Student'}
                   </Typography>
                 </Stack>
               ) : null}
@@ -177,7 +177,7 @@ export function BookingsTable({ bookings, variant = 'student', onStatusChange, u
                 <TableCell sx={{ whiteSpace: 'nowrap' }}>{booking.id}</TableCell>
                 {variant === 'admin' ? (
                   <TableCell sx={{ minWidth: 180 }}>
-                    <Typography fontWeight={600}>{booking.student?.user?.fullName ?? booking.student?.fullName ?? 'Student'}</Typography>
+                    <Typography fontWeight={600}>{booking.student?.user?.fullName ?? 'Student'}</Typography>
                     <Typography variant="body2" color="text.secondary">
                       {booking.student?.user?.email ?? 'No email'}
                     </Typography>
