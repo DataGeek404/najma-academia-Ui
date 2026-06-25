@@ -37,7 +37,7 @@ function CreateNewPasswordContent() {
   });
 
   const mutation = useMutation<{ message: string }, AxiosError<ApiErrorResponse>, ResetPasswordFormValues>({
-    mutationFn: ({ token: submittedToken, password }) => resetPassword({ token: submittedToken, password, confirmPassword: password }),
+    mutationFn: resetPassword,
     onSuccess: async (data: { message: string }) => {
       await showCenteredSuccess('Password updated', data.message);
       router.push('/login');

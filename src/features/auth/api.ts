@@ -50,6 +50,7 @@ export async function forgotPassword(payload: ForgotPasswordFormValues) {
 }
 
 export async function resetPassword(payload: ResetPasswordFormValues) {
-  const { data } = await apiClient.post('/auth/reset-password', payload);
+  const { token, password } = payload;
+  const { data } = await apiClient.post('/auth/reset-password', { token, password });
   return data;
 }
