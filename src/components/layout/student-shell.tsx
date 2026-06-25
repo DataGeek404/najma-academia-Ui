@@ -13,7 +13,6 @@ import {
   Box,
   Button,
   Chip,
-  Divider,
   Drawer,
   IconButton,
   List,
@@ -61,17 +60,16 @@ export function StudentShell({ children }: PropsWithChildren) {
             p: 2.25,
             borderRadius: 4,
             background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.16)} 0%, ${alpha(theme.palette.secondary.main, 0.14)} 100%)`,
-            border: `1px solid ${alpha(theme.palette.primary.main, 0.16)}`,
             boxShadow: `0 18px 40px ${alpha(theme.palette.primary.main, 0.08)}`,
           })}
         >
           <Stack direction="row" spacing={1.5} alignItems="center">
             <Avatar sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', width: 48, height: 48, fontWeight: 800 }}>{userLabel.charAt(0).toUpperCase()}</Avatar>
-            <Box sx={{ minWidth: 0 }}>
-              <Typography fontWeight={800} color="text.primary" noWrap>
+            <Box sx={{ minWidth: 0, flex: 1 }}>
+              <Typography fontWeight={800} color="text.primary" sx={{ wordBreak: 'break-word', lineHeight: 1.2 }}>
                 {userLabel}
               </Typography>
-              <Typography variant="body2" color="text.secondary" noWrap>
+              <Typography variant="body2" color="text.primary" sx={{ mt: 0.5, opacity: 0.82, wordBreak: 'break-word', lineHeight: 1.35 }}>
                 {user?.email ?? 'student@najma.com'}
               </Typography>
             </Box>
@@ -98,7 +96,6 @@ export function StudentShell({ children }: PropsWithChildren) {
                     py: 1.35,
                     borderRadius: 3.5,
                     alignItems: 'flex-start',
-                    border: `1px solid ${isActive ? alpha(theme.palette.primary.main, 0.22) : alpha(theme.palette.divider, 0.5)}`,
                     bgcolor: isActive ? alpha(theme.palette.primary.main, 0.12) : alpha(theme.palette.common.white, 0.92),
                     boxShadow: isActive ? `0 12px 30px ${alpha(theme.palette.primary.main, 0.12)}` : `0 8px 20px ${alpha(theme.palette.common.black, 0.04)}`,
                     '&:hover': {
@@ -127,7 +124,6 @@ export function StudentShell({ children }: PropsWithChildren) {
             p: 2,
             borderRadius: 4,
             bgcolor: alpha(theme.palette.primary.main, 0.04),
-            border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
           })}
         >
           <Stack spacing={1.5}>
@@ -146,7 +142,6 @@ export function StudentShell({ children }: PropsWithChildren) {
       </Stack>
 
       <Box sx={{ pt: 1.5 }}>
-        <Divider sx={{ mb: 2 }} />
         <Button fullWidth variant="outlined" startIcon={<LogoutIcon />} onClick={handleLogout}>
           Logout
         </Button>

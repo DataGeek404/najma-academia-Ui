@@ -6,6 +6,7 @@ import {
   alpha,
   Box,
   Button,
+  Chip,
   CircularProgress,
   Container,
   Paper,
@@ -81,84 +82,165 @@ function LoginPageContent() {
         minHeight: '100vh',
         display: 'flex',
         alignItems: 'center',
-        py: { xs: 4, sm: 6 },
-        background: `radial-gradient(circle at top, ${alpha(theme.palette.primary.main, 0.14)} 0%, ${theme.palette.background.default} 42%)`,
+        py: { xs: 4, md: 6 },
+        background: `radial-gradient(circle at top left, ${alpha(theme.palette.primary.main, 0.18)} 0%, ${alpha(theme.palette.secondary.main, 0.1)} 28%, ${theme.palette.background.default} 62%)`,
       })}
     >
-      <Container maxWidth="sm">
+      <Container maxWidth="lg">
         <Paper
           elevation={0}
           sx={(theme) => ({
-            p: { xs: 3, sm: 4 },
-            borderRadius: 5,
-            border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
-            boxShadow: `0 24px 60px ${alpha(theme.palette.common.black, 0.08)}`,
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', lg: '1.05fr 0.95fr' },
+            borderRadius: 6,
             overflow: 'hidden',
-            position: 'relative',
+            border: `1px solid ${alpha(theme.palette.primary.main, 0.12)}`,
+            boxShadow: `0 28px 70px ${alpha(theme.palette.common.black, 0.1)}`,
+            backgroundColor: alpha(theme.palette.background.paper, 0.94),
+            backdropFilter: 'blur(14px)',
           })}
         >
           <Box
             sx={(theme) => ({
-              position: 'absolute',
-              inset: 0,
-              background: `linear-gradient(180deg, ${alpha(theme.palette.primary.main, 0.08)} 0%, transparent 38%)`,
-              pointerEvents: 'none',
+              position: 'relative',
+              p: { xs: 3, sm: 4, lg: 5 },
+              color: theme.palette.common.white,
+              background: `linear-gradient(145deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+              display: 'flex',
+              alignItems: 'center',
+              overflow: 'hidden',
             })}
-          />
-          <Stack spacing={3} sx={{ position: 'relative' }}>
-            <Stack spacing={1} textAlign="center">
-              <Typography variant="h4" fontWeight={700} sx={{ fontSize: { xs: '1.9rem', sm: '2.25rem' } }}>
-                Welcome back
-              </Typography>
-              <Typography color="text.secondary">
-                Sign in to manage your university tutoring sessions and academic support bookings.
-              </Typography>
-            </Stack>
-            <Box component="form" onSubmit={handleSubmit((values) => mutation.mutate(values))}>
-              <Stack spacing={2}>
-                <Controller
-                  name="email"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <TextField {...field} label="University Email" error={!!fieldState.error} helperText={fieldState.error?.message} fullWidth />
-                  )}
-                />
-                <Controller
-                  name="password"
-                  control={control}
-                  render={({ field, fieldState }) => (
-                    <TextField {...field} type="password" label="Password" error={!!fieldState.error} helperText={fieldState.error?.message} fullWidth />
-                  )}
-                />
-                <Button
-                  component={Link}
-                  href="/forgot-password"
-                  sx={{ alignSelf: 'flex-end', px: 0, minWidth: 'auto' }}
-                >
-                  Forgot password?
-                </Button>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={mutation.isPending || resendMutation.isPending}
-                  size="large"
-                  fullWidth
-                  startIcon={mutation.isPending ? <CircularProgress size={20} color="inherit" /> : null}
-                  sx={{ minHeight: 52 }}
-                >
-                  {mutation.isPending ? 'Signing in...' : 'Sign In'}
-                </Button>
-                {resendMutation.isPending ? (
-                  <Typography variant="body2" color="text.secondary" textAlign="center">
-                    Sending a new verification email...
-                  </Typography>
-                ) : null}
-                <Button component={Link} href="/register" fullWidth>
-                  Create student account
-                </Button>
+          >
+            <Box
+              sx={(theme) => ({
+                position: 'absolute',
+                top: -80,
+                right: -40,
+                width: 220,
+                height: 220,
+                borderRadius: '50%',
+                background: alpha(theme.palette.common.white, 0.12),
+              })}
+            />
+            <Box
+              sx={(theme) => ({
+                position: 'absolute',
+                bottom: -70,
+                left: -30,
+                width: 180,
+                height: 180,
+                borderRadius: '50%',
+                background: alpha(theme.palette.common.white, 0.08),
+              })}
+            />
+            <Stack spacing={3} sx={{ position: 'relative', maxWidth: 520 }}>
+              <Chip label="Learner access" sx={{ alignSelf: 'flex-start', color: 'common.white', borderColor: alpha(theme.palette.common.white, 0.35) }} variant="outlined" />
+              <Stack spacing={1.5}>
+                <Typography variant="h3" fontWeight={900} sx={{ fontSize: { xs: '2.2rem', md: '3rem' }, lineHeight: 1.05 }}>
+                  Welcome back to Najma
+                </Typography>
+                <Typography sx={{ opacity: 0.92, maxWidth: 460 }}>
+                  Sign in to manage bookings, connect with tutors, and keep your learning journey organized from one place.
+                </Typography>
               </Stack>
-            </Box>
-          </Stack>
+              <Stack spacing={1.5}>
+                {[
+                  'Track your tutoring sessions and booking history',
+                  'Access tutors and learning support faster',
+                  'Continue from where you left off securely',
+                ].map((item) => (
+                  <Box key={item} sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+                    <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'common.white', flexShrink: 0 }} />
+                    <Typography sx={{ opacity: 0.95 }}>{item}</Typography>
+                  </Box>
+                ))}
+              </Stack>
+            </Stack>
+          </Box>
+
+          <Box sx={{ p: { xs: 3, sm: 4, lg: 5 } }}>
+            <Stack spacing={3.5}>
+              <Stack spacing={1}>
+                <Typography variant="overline" sx={{ color: 'primary.main', fontWeight: 800, letterSpacing: 1.6 }}>
+                  Sign in
+                </Typography>
+                <Typography variant="h4" fontWeight={900} sx={{ fontSize: { xs: '1.9rem', sm: '2.3rem' } }}>
+                  Access your account
+                </Typography>
+                <Typography color="text.secondary">
+                  Use your registered email and password to continue to your dashboard.
+                </Typography>
+              </Stack>
+
+              <Box component="form" onSubmit={handleSubmit((values) => mutation.mutate(values))}>
+                <Stack spacing={2.25}>
+                  <Controller
+                    name="email"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <TextField {...field} label="Email address" placeholder="you@example.com" error={!!fieldState.error} helperText={fieldState.error?.message} fullWidth />
+                    )}
+                  />
+                  <Controller
+                    name="password"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <TextField {...field} type="password" label="Password" error={!!fieldState.error} helperText={fieldState.error?.message} fullWidth />
+                    )}
+                  />
+
+                  <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} spacing={1}>
+                    <Typography variant="body2" color="text.secondary">
+                      Verified learners only can sign in.
+                    </Typography>
+                    <Button component={Link} href="/forgot-password" sx={{ px: 0, minWidth: 'auto' }}>
+                      Forgot password?
+                    </Button>
+                  </Stack>
+
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={mutation.isPending || resendMutation.isPending}
+                    size="large"
+                    fullWidth
+                    startIcon={mutation.isPending ? <CircularProgress size={20} color="inherit" /> : null}
+                    sx={{ minHeight: 54, fontWeight: 800 }}
+                  >
+                    {mutation.isPending ? 'Signing in...' : 'Sign In'}
+                  </Button>
+
+                  {resendMutation.isPending ? (
+                    <Typography variant="body2" color="text.secondary" textAlign="center">
+                      Sending a new verification email...
+                    </Typography>
+                  ) : null}
+
+                  <Paper
+                    elevation={0}
+                    sx={(theme) => ({
+                      p: 2,
+                      borderRadius: 4,
+                      bgcolor: alpha(theme.palette.primary.main, 0.04),
+                      border: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                    })}
+                  >
+                    <Stack spacing={1} alignItems="center" textAlign="center">
+                      <Typography fontWeight={800} color="text.primary">
+                        New to Najma?
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Create a learner account to book sessions and access tutor support.
+                      </Typography>
+                      <Button component={Link} href="/register" fullWidth variant="outlined" sx={{ mt: 0.5 }}>
+                        Create student account
+                      </Button>
+                    </Stack>
+                  </Paper>
+                </Stack>
+              </Box>
+            </Stack>
+          </Box>
         </Paper>
       </Container>
     </Box>
