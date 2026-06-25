@@ -13,13 +13,18 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+import type { AxiosError } from 'axios';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { login } from '@/features/auth/api';
+import { getAuthErrorMessage, login } from '@/features/auth/api';
 import { LoginFormValues, loginSchema } from '@/features/auth/schemas';
 import { showCenteredError, showCenteredSuccess } from '@/lib/sweet-alert';
+
+type ApiErrorResponse = {
+  message?: string | string[] | { message?: string[] };
+};
 
 function LoginPageContent() {
   const router = useRouter();
@@ -35,7 +40,7 @@ function LoginPageContent() {
     }
   }, [searchParams]);
 
-  const mutation = useMutation({
+  const mutation = useMutation<any, AxiosError<ApiErrorResponse>, LoginFormValues>({
     mutationFn: login,
     onSuccess: async (data) => {
       localStorage.setItem('accessToken', data.accessToken);
@@ -43,8 +48,8 @@ function LoginPageContent() {
       await showCenteredSuccess('Login successful', 'Welcome back to your tutoring workspace.');
       router.push(data.user.role === 'admin' ? '/admin' : '/bookings');
     },
-    onError: async () => {
-      await showCenteredError('Login failed', 'Please check your credentials and try again.');
+    onError: async (error: AxiosError<ApiErrorResponse>) => {
+      await showCenteredError('Login failed', getAuthErrorMessage(error, 'Please check your credentials and try again.'));
     },
   });
 
@@ -103,6 +108,13 @@ function LoginPageContent() {
                     <TextField {...field} type="password" label="Password" error={!!fieldState.error} helperText={fieldState.error?.message} fullWidth />
                   )}
                 />
+                <Button
+                  component={Link}
+                  href="/forgot-password"
+                  sx={{ alignSelf: 'flex-end', px: 0, minWidth: 'auto' }}
+                >
+                  Forgot password?
+                </Button>
                 <Button
                   type="submit"
                   variant="contained"

@@ -17,7 +17,7 @@ import type { AxiosError } from 'axios';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Controller, useForm } from 'react-hook-form';
-import { register } from '@/features/auth/api';
+import { getAuthErrorMessage, register } from '@/features/auth/api';
 import { logoutUser } from '@/features/auth/logout';
 import { RegisterFormValues, registerSchema } from '@/features/auth/schemas';
 import { showCenteredError, showCenteredSuccess } from '@/lib/sweet-alert';
@@ -30,24 +30,6 @@ type AuthResponse = {
   accessToken: string;
   user: unknown;
 };
-
-function getErrorMessage(error: AxiosError<ApiErrorResponse>) {
-  const payload = error.response?.data?.message;
-
-  if (Array.isArray(payload)) {
-    return payload.join(' ');
-  }
-
-  if (typeof payload === 'string') {
-    return payload;
-  }
-
-  if (payload && Array.isArray(payload.message)) {
-    return payload.message.join(' ');
-  }
-
-  return 'Registration failed. Please try again.';
-}
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -64,7 +46,7 @@ export default function RegisterPage() {
       router.push('/login?registered=1');
     },
     onError: async (requestError: AxiosError<ApiErrorResponse>) => {
-      await showCenteredError('Registration failed', getErrorMessage(requestError));
+      await showCenteredError('Registration failed', getAuthErrorMessage(requestError, 'Registration failed. Please try again.'));
     },
   });
 
